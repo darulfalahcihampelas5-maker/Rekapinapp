@@ -166,7 +166,7 @@ export const LoginDashboard: React.FC<LoginDashboardProps> = ({
           
           <div className="space-y-1">
             <h1 className="text-3xl sm:text-5xl font-black tracking-tight uppercase font-sans">
-              <span className="text-[#CC2302]">REKAPIN</span> <span className="text-sky-600">App</span>
+              <span className="text-[#CC2302]">REKAPIN</span> <span className="text-sky-600">AJA</span>
             </h1>
             <p className="text-[10px] sm:text-xs md:text-sm text-slate-600 font-sans tracking-wide whitespace-nowrap">
               <strong className="font-black text-slate-900">R</strong>ekap{' '}
@@ -388,7 +388,7 @@ export const LoginDashboard: React.FC<LoginDashboardProps> = ({
               id="btn-login-submit"
               className="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-600/25 transition-all cursor-pointer mt-2"
             >
-              <span>Masuk ke REKAPIN App ({activeTab === 'IT_ADMIN' ? 'Tim IT' : 'Kepala Sekolah'})</span>
+              <span>Masuk ke REKAPIN AJA ({activeTab === 'IT_ADMIN' ? 'Tim IT' : 'Kepala Sekolah'})</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 

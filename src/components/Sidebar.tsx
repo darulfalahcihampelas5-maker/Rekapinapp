@@ -166,7 +166,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             />
             <div className="flex flex-col justify-center min-w-0">
               <h1 className="text-base sm:text-lg font-black tracking-tight leading-none">
-                <span className="text-[#CC2302]">REKAPIN</span> <span className="text-sky-600 font-extrabold">App</span>
+                <span className="text-[#CC2302]">REKAPIN</span> <span className="text-sky-600 font-extrabold">AJA</span>
               </h1>
               <p className="text-[11px] sm:text-xs font-semibold text-slate-500 truncate max-w-[150px] mt-1 leading-tight" title={loggedInUser || settings.schoolName}>
                 {loggedInUser ? loggedInUser : 'Sistem Manajemen Voucher'}

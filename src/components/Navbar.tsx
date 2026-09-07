@@ -63,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-extrabold text-lg tracking-tight text-white flex items-center gap-1.5">
-                  <span className="text-[#CC2302]">REKAPIN</span> <span className="text-xs px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-400 font-semibold border border-sky-500/30">App</span>
+                  <span className="text-[#CC2302]">REKAPIN</span> <span className="text-xs px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-400 font-semibold border border-sky-500/30">AJA</span>
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 font-medium truncate max-w-[200px] sm:max-w-xs">

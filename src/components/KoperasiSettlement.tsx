@@ -14,6 +14,8 @@ import {
   Sparkles,
   Eye
 } from 'lucide-react';
+import { toPng } from 'html-to-image';
+import jsPDF from 'jspdf';
 
 interface KoperasiSettlementProps {
   vouchers: VoucherItem[];
@@ -538,13 +540,13 @@ export const KoperasiSettlement: React.FC<KoperasiSettlementProps> = ({
             </div>
 
             {/* Printable Official Receipt Area (1-Page A4 Ready) */}
-            <div className="p-5 rounded-xl bg-slate-50/70 border border-slate-200 text-xs space-y-4 font-sans print:bg-white print:border-none print:p-0">
+            <div id="print-kuitansi-area" className="p-5 rounded-xl bg-slate-50/70 border border-slate-200 text-xs space-y-4 font-sans print:bg-white print:border-none print:p-0">
               
               {/* Kop Surat Header */}
               <div className="pb-3 border-b-2 border-slate-900 flex justify-between items-start">
                 <div>
-                  <h3 className="font-black text-sm uppercase tracking-tight text-slate-900 font-serif">
-                    {settings.schoolName}
+                  <h3 className="text-lg font-black uppercase tracking-tight font-sans">
+                    <span className="text-[#CC2302]">REKAPIN</span> <span className="text-sky-600">AJA</span>
                   </h3>
                   <p className="text-[10px] font-bold text-slate-700 uppercase">
                     KOPERASI & UNIT PENGELOLAAN IT
@@ -631,11 +633,20 @@ export const KoperasiSettlement: React.FC<KoperasiSettlementProps> = ({
             {/* Action Buttons */}
             <div className="flex items-center gap-2 print:hidden">
               <button
-                onClick={() => {
-                  window.focus();
-                  setTimeout(() => {
-                    window.print();
-                  }, 150);
+                onClick={async () => {
+                  const element = document.getElementById('print-kuitansi-area');
+                  if (!element) return;
+                  
+                  try {
+                    const dataUrl = await toPng(element, { quality: 0.98, backgroundColor: '#ffffff' });
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = (element.offsetHeight * pdfWidth) / element.offsetWidth;
+                    pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                    pdf.save(`Kuitansi_Setoran_${selectedReceipt.id.slice(0, 6)}.pdf`);
+                  } catch (err) {
+                    console.error('Error generating PDF:', err);
+                  }
                 }}
                 className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
               >

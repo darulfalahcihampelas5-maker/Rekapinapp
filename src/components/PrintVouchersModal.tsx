@@ -1,6 +1,8 @@
 import React from 'react';
 import { VoucherItem, SystemSettings, VoucherBatch } from '../types';
 import { Printer, X, Wifi } from 'lucide-react';
+import { toPng } from 'html-to-image';
+import jsPDF from 'jspdf';
 
 interface PrintVouchersModalProps {
   isOpen: boolean;
@@ -24,11 +26,20 @@ export const PrintVouchersModal: React.FC<PrintVouchersModalProps> = ({
     ? vouchers.filter(v => v.batchId === batch.id)
     : vouchers.filter(v => v.status === 'DI_IT' || v.status === 'DI_KOPERASI');
 
-  const handlePrint = () => {
-    window.focus();
-    setTimeout(() => {
-      window.print();
-    }, 150);
+  const handlePrint = async () => {
+    const element = document.getElementById('print-voucher-area');
+    if (!element) return;
+    
+    try {
+      const dataUrl = await toPng(element, { quality: 0.98, backgroundColor: '#ffffff' });
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (element.offsetHeight * pdfWidth) / element.offsetWidth;
+      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Cetak_Voucher_${batch ? batch.batchNumber : 'Semua'}.pdf`);
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+    }
   };
 
   return (
@@ -69,7 +80,7 @@ export const PrintVouchersModal: React.FC<PrintVouchersModalProps> = ({
         </div>
 
         {/* Printable Voucher Grid */}
-        <div className="p-6 overflow-y-auto flex-1 bg-slate-50 print:bg-white print:p-0">
+        <div id="print-voucher-area" className="p-6 overflow-y-auto flex-1 bg-slate-50 print:bg-white print:p-0">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 print:grid-cols-4 print:gap-2">
             {vouchersToPrint.map((voucher) => (
               <div 
@@ -81,7 +92,7 @@ export const PrintVouchersModal: React.FC<PrintVouchersModalProps> = ({
                   <div className="flex items-center gap-1">
                     <Wifi className="w-3 h-3 text-emerald-600" />
                     <span className="text-[8px] font-black uppercase text-slate-800 truncate max-w-[60px]">
-                      REKAPIN App
+                      REKAPIN AJA
                     </span>
                   </div>
                   <span className="text-[7px] font-bold text-slate-500">{settings.wifiSsid}</span>

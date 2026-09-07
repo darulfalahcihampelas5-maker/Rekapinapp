@@ -67,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex flex-col justify-center">
             <div className="flex items-center gap-1.5">
               <h1 className="text-base sm:text-xl font-black tracking-tight leading-none">
-                <span className="text-[#CC2302]">REKAPIN</span> <span className="text-sky-600 font-extrabold">App</span>
+                <span className="text-[#CC2302]">REKAPIN</span> <span className="text-sky-600 font-extrabold">AJA</span>
               </h1>
               <span className="hidden sm:inline-flex text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 leading-none">
                 {roleInfo.tag}
@@ -97,7 +97,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={handleLogoutClick}
             className="p-2 rounded-full text-rose-600 bg-rose-50 hover:bg-rose-100 hover:text-rose-700 active:bg-rose-200 border border-rose-100 shadow-xs transition-colors cursor-pointer flex items-center justify-center"
-            title="Keluar ke Dasbor Login REKAPIN App"
+            title="Keluar ke Dasbor Login REKAPIN AJA"
           >
             <Power className="w-4 h-4" />
           </button>

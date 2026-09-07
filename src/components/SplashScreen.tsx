@@ -26,7 +26,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         {/* Brand Header directly on background with tightened text spacing */}
         <div className="space-y-1.5 flex flex-col items-center">
           <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight uppercase font-sans leading-none pb-1">
-            <span className="text-[#CC2302]">REKAPIN</span> <span className="text-sky-600">App</span>
+            <span className="text-[#CC2302]">REKAPIN</span> <span className="text-sky-600">AJA</span>
           </h1>
           <p className="text-[10px] sm:text-xs md:text-sm text-slate-600 font-sans tracking-wide whitespace-nowrap overflow-x-auto leading-tight">
             <strong className="font-black text-slate-900">R</strong>ekap{' '}

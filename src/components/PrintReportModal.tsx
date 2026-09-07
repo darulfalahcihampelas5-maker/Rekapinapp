@@ -8,6 +8,8 @@ import {
 } from '../types';
 import { formatRupiah, formatDateIndo, parseStaffNames } from '../utils/format';
 import { Printer, X, FileSpreadsheet, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { toPng } from 'html-to-image';
+import jsPDF from 'jspdf';
 
 interface PrintReportModalProps {
   isOpen: boolean;
@@ -35,7 +37,7 @@ export const PrintReportModal: React.FC<PrintReportModalProps> = ({
   const itStaffList = parseStaffNames(settings.itStaffNames);
   const koperasiStaffList = parseStaffNames(settings.koperasiManagerName);
   const [selectedItStaff, setSelectedItStaff] = React.useState<string>(
-    propSelectedItStaff || itStaffList[0] || `Tim IT REKAPIN App`
+    propSelectedItStaff || itStaffList[0] || `Tim IT REKAPIN AJA`
   );
   const [selectedKoperasiStaff, setSelectedKoperasiStaff] = React.useState<string>(koperasiStaffList[0] || settings.koperasiName);
 
@@ -72,15 +74,19 @@ export const PrintReportModal: React.FC<PrintReportModalProps> = ({
   const totalStockInKoperasi = vouchers.filter(v => v.status === 'DI_KOPERASI').length;
   const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
+    const element = document.getElementById('print-report-area');
+    if (!element) return;
+    
     try {
-      window.focus();
-      setTimeout(() => {
-        window.print();
-      }, 150);
+      const dataUrl = await toPng(element, { quality: 0.98, backgroundColor: '#ffffff' });
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (element.offsetHeight * pdfWidth) / element.offsetWidth;
+      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Laporan_REKAPIN_AJA_${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (err) {
-      console.error('Error triggering print dialog:', err);
-      window.print();
+      console.error('Error generating PDF:', err);
     }
   };
 
@@ -136,14 +142,14 @@ export const PrintReportModal: React.FC<PrintReportModalProps> = ({
         </div>
 
         {/* Printable Report Document (A4 1-Page Layout) */}
-        <div className="p-6 sm:p-8 overflow-y-auto flex-1 bg-white text-slate-900 font-sans print:p-0 print:m-0">
+        <div id="print-report-area" className="p-6 sm:p-8 overflow-y-auto flex-1 bg-white text-slate-900 font-sans print:p-0 print:m-0">
           
           {/* Header Kop Surat (Sleek & Official) */}
           <div className="pb-3 border-b-2 border-slate-900 mb-4 print-no-break">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-black uppercase tracking-tight text-slate-900 font-serif">
-                  REKAPIN App
+                <h2 className="text-lg font-black uppercase tracking-tight font-sans">
+                  <span className="text-[#CC2302]">REKAPIN</span> <span className="text-sky-600">AJA</span>
                 </h2>
                 <p className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                   UNIT PENGELOLAAN IT & {settings.koperasiName}
@@ -273,7 +279,7 @@ export const PrintReportModal: React.FC<PrintReportModalProps> = ({
                 </tr>
                 <tr>
                   <td className="p-1.5 font-bold text-slate-900 border-r border-slate-200">
-                    2. Tim Pengelola IT REKAPIN App
+                    2. Tim Pengelola IT REKAPIN AJA
                   </td>
                   <td className="p-1.5 border-r border-slate-200">
                     Rp {(settings.itProfitPerUnit ?? 750).toLocaleString('id-ID')} / voucher
@@ -355,7 +361,7 @@ export const PrintReportModal: React.FC<PrintReportModalProps> = ({
                   <span className="text-[8px] text-slate-300 italic">( Tanda Tangan & Cap )</span>
                 </div>
                 <p className="font-bold text-slate-900 border-t border-slate-400 pt-0.5 mt-1">
-                  {selectedItStaff ? selectedItStaff : `( Tim IT REKAPIN App )`}
+                  {selectedItStaff ? selectedItStaff : `( Tim IT REKAPIN AJA )`}
                 </p>
               </div>
 
@@ -366,13 +372,13 @@ export const PrintReportModal: React.FC<PrintReportModalProps> = ({
                   <span className="text-[8px] text-slate-300 italic">( Tanda Tangan & Cap )</span>
                 </div>
                 <p className="font-bold text-slate-900 border-t border-slate-400 pt-0.5 mt-1">
-                  {settings.kepalaSekolahName ? settings.kepalaSekolahName : `( Kepala REKAPIN App )`}
+                  {settings.kepalaSekolahName ? settings.kepalaSekolahName : `( Kepala REKAPIN AJA )`}
                 </p>
               </div>
 
             </div>
             <div className="text-center mt-2 text-[8px] text-slate-400 italic">
-              Dokumen ini diterbitkan oleh REKAPIN App secara resmi.
+              Dokumen ini diterbitkan oleh REKAPIN AJA secara resmi.
             </div>
           </div>
 

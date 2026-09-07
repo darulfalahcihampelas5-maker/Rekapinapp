@@ -1,5 +1,5 @@
 {
-  "name": "REKAPIN App - Rekap E-Voucher WiFi",
+  "name": "REKAPIN AJA - Rekap E-Voucher WiFi",
   "description": "REKAPIN (Rekap E-Voucher, Koneksi Akurat, Payments Internet Network) adalah aplikasi praktis untuk mencatat transaksi jual-beli dan pembayaran voucher Wi-Fi siswa secara otomatis, akurat, dan real-time.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
