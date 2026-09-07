@@ -1,0 +1,135 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global helper functions
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 1. Settings Collection Rule
+    match /settings/{docId} {
+      allow read: if true;
+      allow create, update: if isValidId(docId)
+        && request.resource.data.keys().hasAll(['schoolName', 'wifiSsid', 'providerName', 'koperasiName', 'kepalaSekolahName', 'itStaffNames', 'koperasiManagerName', 'costPricePerUnit', 'sellPricePerUnit', 'koperasiProfitPerUnit', 'itProfitPerUnit', 'kepsekProfitPerUnit', 'autoGenerateSerials'])
+        && request.resource.data.schoolName is string
+        && request.resource.data.wifiSsid is string
+        && request.resource.data.providerName is string
+        && request.resource.data.koperasiName is string
+        && request.resource.data.kepalaSekolahName is string
+        && request.resource.data.itStaffNames is string
+        && request.resource.data.koperasiManagerName is string
+        && request.resource.data.costPricePerUnit is int
+        && request.resource.data.sellPricePerUnit is int
+        && request.resource.data.koperasiProfitPerUnit is int
+        && request.resource.data.itProfitPerUnit is int
+        && request.resource.data.kepsekProfitPerUnit is int
+        && request.resource.data.autoGenerateSerials is bool;
+      allow delete: if isValidId(docId);
+    }
+
+    // 2. Batches Collection Rule
+    match /batches/{docId} {
+      allow read: if true;
+      allow create, update: if isValidId(docId)
+        && request.resource.data.keys().hasAll(['id', 'batchNumber', 'providerName', 'purchaseDate', 'voucherQty', 'unitCost', 'totalCost', 'status', 'serialPrefix', 'serialStart', 'serialEnd'])
+        && request.resource.data.id == docId
+        && request.resource.data.batchNumber is string
+        && request.resource.data.providerName is string
+        && request.resource.data.purchaseDate is string
+        && request.resource.data.voucherQty is int
+        && request.resource.data.unitCost is int
+        && request.resource.data.totalCost is int
+        && request.resource.data.status is string
+        && request.resource.data.serialPrefix is string
+        && request.resource.data.serialStart is int
+        && request.resource.data.serialEnd is int;
+      allow delete: if isValidId(docId);
+    }
+
+    // 3. Vouchers Collection Rule
+    match /vouchers/{docId} {
+      allow read: if true;
+      allow create, update: if isValidId(docId)
+        && request.resource.data.keys().hasAll(['id', 'batchId', 'batchNumber', 'code', 'serialNumber', 'duration', 'status', 'unitCost', 'sellingPrice'])
+        && request.resource.data.id == docId
+        && request.resource.data.batchId is string
+        && request.resource.data.batchNumber is string
+        && request.resource.data.code is string
+        && request.resource.data.serialNumber is string
+        && request.resource.data.duration is string
+        && request.resource.data.status is string
+        && request.resource.data.unitCost is int
+        && request.resource.data.sellingPrice is int;
+      allow delete: if isValidId(docId);
+    }
+
+    // 4. Handovers Collection Rule
+    match /handovers/{docId} {
+      allow read: if true;
+      allow create, update: if isValidId(docId)
+        && request.resource.data.keys().hasAll(['id', 'transferDate', 'batchId', 'batchNumber', 'qty', 'giverName', 'receiverName', 'notes', 'status'])
+        && request.resource.data.id == docId
+        && request.resource.data.transferDate is string
+        && request.resource.data.batchId is string
+        && request.resource.data.batchNumber is string
+        && request.resource.data.qty is int
+        && request.resource.data.giverName is string
+        && request.resource.data.receiverName is string
+        && request.resource.data.notes is string
+        && request.resource.data.status is string;
+      allow delete: if isValidId(docId);
+    }
+
+    // 5. Sales Collection Rule
+    match /sales/{docId} {
+      allow read: if true;
+      allow create, update: if isValidId(docId)
+        && request.resource.data.keys().hasAll(['id', 'saleDate', 'voucherId', 'serialNumber', 'buyerName', 'buyerClass', 'sellPrice', 'status'])
+        && request.resource.data.id == docId
+        && request.resource.data.saleDate is string
+        && request.resource.data.voucherId is string
+        && request.resource.data.serialNumber is string
+        && request.resource.data.buyerName is string
+        && request.resource.data.buyerClass is string
+        && request.resource.data.sellPrice is int
+        && request.resource.data.status is string;
+      allow delete: if isValidId(docId);
+    }
+
+    // 6. Settlements Collection Rule
+    match /settlements/{docId} {
+      allow read: if true;
+      allow create, update: if isValidId(docId)
+        && request.resource.data.keys().hasAll(['id', 'date', 'vouchersCount', 'amountCollected', 'settledBy', 'receivedBy', 'status'])
+        && request.resource.data.id == docId
+        && request.resource.data.date is string
+        && request.resource.data.vouchersCount is int
+        && request.resource.data.amountCollected is int
+        && request.resource.data.settledBy is string
+        && request.resource.data.receivedBy is string
+        && request.resource.data.status is string;
+      allow delete: if isValidId(docId);
+    }
+
+    // 7. Expenses Collection Rule
+    match /expenses/{docId} {
+      allow read: if true;
+      allow create, update: if isValidId(docId)
+        && request.resource.data.keys().hasAll(['id', 'date', 'amount', 'category', 'title', 'recordedBy'])
+        && request.resource.data.id == docId
+        && request.resource.data.date is string
+        && (request.resource.data.amount is int || request.resource.data.amount is number)
+        && request.resource.data.category is string
+        && request.resource.data.title is string
+        && request.resource.data.recordedBy is string
+        && (!('notes' in request.resource.data) || request.resource.data.notes is string);
+      allow delete: if isValidId(docId);
+    }
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "$schema": "https://firebase.google.com/schemas/firestore-blueprint.json",
+  "entities": {
+    "settings": {
+      "collection": "settings",
+      "fields": {
+        "schoolName": { "type": "string" },
+        "wifiSsid": { "type": "string" },
+        "providerName": { "type": "string" },
+        "costPricePerUnit": { "type": "number" },
+        "sellPricePerUnit": { "type": "number" },
+        "koperasiProfitPerUnit": { "type": "number" },
+        "itProfitPerUnit": { "type": "number" },
+        "kepsekProfitPerUnit": { "type": "number" },
+        "autoGenerateSerials": { "type": "boolean" }
+      }
+    },
+    "batches": {
+      "collection": "batches",
+      "fields": {
+        "batchNumber": { "type": "string" },
+        "providerName": { "type": "string" },
+        "purchaseDate": { "type": "string" },
+        "voucherQty": { "type": "number" },
+        "unitCost": { "type": "number" },
+        "totalCost": { "type": "number" },
+        "status": { "type": "string" },
+        "notes": { "type": "string" },
+        "serialPrefix": { "type": "string" },
+        "serialStart": { "type": "number" },
+        "serialEnd": { "type": "number" }
+      }
+    },
+    "vouchers": {
+      "collection": "vouchers",
+      "fields": {
+        "batchId": { "type": "string" },
+        "batchNumber": { "type": "string" },
+        "code": { "type": "string" },
+        "serialNumber": { "type": "string" },
+        "duration": { "type": "string" },
+        "status": { "type": "string" },
+        "unitCost": { "type": "number" },
+        "sellingPrice": { "type": "number" },
+        "soldAt": { "type": "string" },
+        "soldToStudent": { "type": "string" },
+        "studentClass": { "type": "string" },
+        "koperasiReceiver": { "type": "string" }
+      }
+    },
+    "handovers": {
+      "collection": "handovers",
+      "fields": {
+        "transferDate": { "type": "string" },
+        "batchId": { "type": "string" },
+        "batchNumber": { "type": "string" },
+        "qty": { "type": "number" },
+        "giverName": { "type": "string" },
+        "receiverName": { "type": "string" },
+        "notes": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "sales": {
+      "collection": "sales",
+      "fields": {
+        "transactionDate": { "type": "string" },
+        "voucherCodes": { "type": "array" },
+        "qty": { "type": "number" },
+        "unitPrice": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "paymentMethod": { "type": "string" },
+        "studentName": { "type": "string" },
+        "studentClass": { "type": "string" },
+        "cashierName": { "type": "string" },
+        "koperasiShare": { "type": "number" },
+        "itShare": { "type": "number" },
+        "kepsekShare": { "type": "number" },
+        "modalCost": { "type": "number" }
+      }
+    },
+    "settlements": {
+      "collection": "settlements",
+      "fields": {
+        "date": { "type": "string" },
+        "vouchersCount": { "type": "number" },
+        "amountCollected": { "type": "number" },
+        "settledBy": { "type": "string" },
+        "receivedBy": { "type": "string" },
+        "notes": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "expenses": {
+      "collection": "expenses",
+      "fields": {
+        "date": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "amount": { "type": "number" },
+        "recordedBy": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}
