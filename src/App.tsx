@@ -37,6 +37,7 @@ import { DashboardOverview } from './components/DashboardOverview';
 import { ItBatchManagement } from './components/ItBatchManagement';
 import { KoperasiSettlement } from './components/KoperasiSettlement';
 import { ExpenseManagement } from './components/ExpenseManagement';
+import { ActivityHistory } from './components/ActivityHistory';
 import { KepsekAuditDashboard } from './components/KepsekAuditDashboard';
 import { QuotaUsageDashboard } from './components/QuotaUsageDashboard';
 import { PrintReportModal } from './components/PrintReportModal';
@@ -532,6 +533,18 @@ export default function App() {
               onAddExpense={handleAddExpense}
               onUpdateExpense={handleUpdateExpense}
               onDeleteExpense={handleDeleteExpense}
+            />
+          )}
+
+          {/* Riwayat Aktivitas Pertanggal (Anti-Dobel Input: 3 Alur Utama) */}
+          {activeTab === 'activity_history' && (
+            <ActivityHistory
+              batches={batches}
+              handovers={handovers}
+              settlements={settlements}
+              settings={settings}
+              currentRole={currentRole}
+              onNavigateTab={handleNavigateTab}
             />
           )}
 

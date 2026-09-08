@@ -9,6 +9,7 @@ import {
   ReceiptText,
   FileCheck,
   Gauge,
+  History,
   Settings,
   Database,
   Power,
@@ -77,6 +78,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'expenses',
       label: 'Pengeluaran',
       icon: ReceiptText,
+    },
+    {
+      id: 'activity_history',
+      label: 'Riwayat Aktivitas',
+      icon: History,
     },
     {
       id: 'financial_report',

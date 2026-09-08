@@ -24,7 +24,8 @@ import {
   Package,
   CircleDollarSign,
   Info,
-  ChevronRight
+  ChevronRight,
+  History
 } from 'lucide-react';
 
 interface DashboardOverviewProps {
@@ -93,7 +94,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             Monitoring stok voucher, alokasi pembelian ke PT SIDNet, dan pembagian kas secara real-time
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => onNavigateTab('activity_history')}
+            className="px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-slate-200"
+          >
+            <History className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Riwayat Aktivitas</span>
+          </button>
           <button
             onClick={() => onNavigateTab('it_buy_sidnet')}
             className="px-3.5 py-1.5 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-sky-200"
