@@ -16,6 +16,7 @@ export interface SystemSettings {
   itProfitPerUnit: number;         // Rp 375 (or custom split)
   kepsekProfitPerUnit: number;     // Rp 375 (or custom split)
   autoGenerateSerials: boolean;
+  userPhotos?: Record<string, string>; // Mapping of username to avatar image (data URL / base64)
 }
 
 export interface VoucherBatch {

@@ -1552,11 +1552,35 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
                   if (!element) return;
                   
                   try {
-                    const dataUrl = await toPng(element, { quality: 0.98, backgroundColor: '#ffffff' });
+                    const dataUrl = await toPng(element, {
+                      quality: 1.0,
+                      pixelRatio: 3,
+                      backgroundColor: '#ffffff',
+                      cacheBust: true,
+                    });
                     const pdf = new jsPDF('p', 'mm', 'a4');
-                    const pdfWidth = pdf.internal.pageSize.getWidth();
-                    const pdfHeight = (element.offsetHeight * pdfWidth) / element.offsetWidth;
-                    pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    const margin = 10;
+                    const availWidth = pageWidth - (margin * 2);
+                    const availHeight = pageHeight - (margin * 2);
+
+                    const elemWidth = element.scrollWidth || element.offsetWidth;
+                    const elemHeight = element.scrollHeight || element.offsetHeight;
+                    const contentRatio = elemHeight / elemWidth;
+
+                    let renderWidth = availWidth;
+                    let renderHeight = renderWidth * contentRatio;
+
+                    if (renderHeight > availHeight) {
+                      renderHeight = availHeight;
+                      renderWidth = renderHeight / contentRatio;
+                    }
+
+                    const posX = margin + (availWidth - renderWidth) / 2;
+                    const posY = margin + (availHeight - renderHeight) / 2;
+
+                    pdf.addImage(dataUrl, 'PNG', posX, posY, renderWidth, renderHeight, undefined, 'FAST');
                     pdf.save(`Tanda_Terima_Voucher_${selectedHandoverReceipt.id.slice(0, 6)}.pdf`);
                   } catch (err) {
                     console.error('Error generating PDF:', err);

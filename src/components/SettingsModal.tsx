@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { SystemSettings } from '../types';
-import { Settings, X, Save, Trash2, Edit2, Plus } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { SystemSettings, UserRole } from '../types';
+import { Settings, X, Save, Trash2, Edit2, Plus, Camera, Lock, User, CheckCircle2, ShieldAlert, Image as ImageIcon } from 'lucide-react';
 import { formatRupiah, parseStaffNames } from '../utils/format';
+import { processProfileImage } from '../utils/imageUtils';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -9,6 +10,8 @@ interface SettingsModalProps {
   settings: SystemSettings;
   onSaveSettings: (newSettings: SystemSettings) => void;
   onOpenReset: () => void;
+  loggedInUser?: string;
+  currentRole?: UserRole;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -17,12 +20,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   settings,
   onSaveSettings,
   onOpenReset,
+  loggedInUser,
+  currentRole,
 }) => {
   const [formData, setFormData] = useState<SystemSettings>({ ...settings });
   const [isResetting, setIsResetting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [itStaffArray, setItStaffArray] = useState<string[]>([]);
   const [newItName, setNewItName] = useState('');
+  const [photoUploadError, setPhotoUploadError] = useState<string | null>(null);
+  const [uploadingUser, setUploadingUser] = useState<string | null>(null);
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -31,6 +40,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       const names = parseStaffNames(settings.itStaffNames);
       setItStaffArray(names);
       setNewItName('');
+      setPhotoUploadError(null);
     }
   }, [isOpen, settings]);
 
@@ -54,6 +64,99 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setItStaffArray(updated);
     setFormData((prev) => ({ ...prev, itStaffNames: updated.join('; ') }));
   };
+
+  // Upload photo handler for the active logged-in user
+  const handlePhotoUpload = async (targetUsername: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Strict security check: User cannot change other users' photos
+    if (targetUsername.trim().toLowerCase() !== (loggedInUser || '').trim().toLowerCase()) {
+      alert('Akses Ditolak: Anda hanya dapat mengunggah foto profil untuk akun Anda sendiri!');
+      if (e.target) e.target.value = '';
+      return;
+    }
+
+    try {
+      setUploadingUser(targetUsername);
+      setPhotoUploadError(null);
+      const compressedDataUrl = await processProfileImage(file, 250, 0.88);
+
+      const updatedPhotos = {
+        ...(formData.userPhotos || {}),
+        [targetUsername]: compressedDataUrl,
+      };
+
+      const updatedSettings = {
+        ...formData,
+        userPhotos: updatedPhotos,
+      };
+
+      setFormData(updatedSettings);
+      // Auto-save immediately to Firestore so changes persist right away
+      onSaveSettings(updatedSettings);
+      alert(`Foto profil untuk ${targetUsername} berhasil diunggah dan disimpan!`);
+    } catch (err: any) {
+      console.error('Error processing photo:', err);
+      setPhotoUploadError(err?.message || 'Gagal memproses foto profil.');
+    } finally {
+      setUploadingUser(null);
+      if (e.target) e.target.value = '';
+    }
+  };
+
+  const handleRemovePhoto = (targetUsername: string) => {
+    if (targetUsername.trim().toLowerCase() !== (loggedInUser || '').trim().toLowerCase()) {
+      alert('Akses Ditolak: Anda hanya dapat menghapus foto profil untuk akun Anda sendiri!');
+      return;
+    }
+
+    if (!confirm(`Hapus foto profil untuk ${targetUsername}?`)) return;
+
+    const updatedPhotos = { ...(formData.userPhotos || {}) };
+    delete updatedPhotos[targetUsername];
+
+    const updatedSettings = {
+      ...formData,
+      userPhotos: updatedPhotos,
+    };
+
+    setFormData(updatedSettings);
+    onSaveSettings(updatedSettings);
+  };
+
+  // Build the list of all registered system users
+  const systemUsers: Array<{ name: string; roleLabel: string; isItStaff?: boolean }> = [];
+
+  // 1. IT Staff
+  itStaffArray.forEach((name) => {
+    if (name.trim()) {
+      systemUsers.push({ name: name.trim(), roleLabel: 'Tim IT Pengelola', isItStaff: true });
+    }
+  });
+
+  // 2. Kepala Sekolah
+  if (formData.kepalaSekolahName?.trim()) {
+    systemUsers.push({ name: formData.kepalaSekolahName.trim(), roleLabel: 'Kepala Sekolah (Penanggung Jawab)' });
+  }
+
+  // 3. Pengurus / Kasir Koperasi
+  if (formData.koperasiManagerName?.trim()) {
+    // Check if comma separated
+    const kopNames = formData.koperasiManagerName.split(/[,;]/).map(s => s.trim()).filter(Boolean);
+    if (kopNames.length > 0) {
+      kopNames.forEach(name => {
+        systemUsers.push({ name, roleLabel: 'Pengurus / Kasir Koperasi' });
+      });
+    } else {
+      systemUsers.push({ name: formData.koperasiManagerName.trim(), roleLabel: 'Pengurus / Kasir Koperasi' });
+    }
+  }
+
+  // 4. Default / Guest Koperasi fallback
+  if (loggedInUser === 'Kasir Koperasi' && !systemUsers.some(u => u.name === 'Kasir Koperasi')) {
+    systemUsers.push({ name: 'Kasir Koperasi', roleLabel: 'Kasir Penjual Koperasi' });
+  }
 
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -318,6 +421,138 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-75 disabled:bg-slate-100 disabled:cursor-not-allowed"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Section: Foto Profil Pengguna Sistem (User Photos Management) */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3.5">
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-emerald-100 text-emerald-700">
+                  <ImageIcon className="w-4 h-4" />
+                </div>
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                  Foto Profil Pengguna Sistem
+                </h4>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Setiap pengguna dapat mengunggah dan memperbarui foto profilnya masing-masing. Foto profil pengguna lain terkunci demi keamanan privasi.
+              </p>
+            </div>
+
+            {photoUploadError && (
+              <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>{photoUploadError}</span>
+              </div>
+            )}
+
+            <div className="space-y-2.5">
+              {systemUsers.map((user, idx) => {
+                const isCurrent = user.name.trim().toLowerCase() === (loggedInUser || '').trim().toLowerCase();
+                const userPhoto = formData.userPhotos?.[user.name];
+                const isUploading = uploadingUser === user.name;
+
+                return (
+                  <div
+                    key={idx}
+                    className={`p-3 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                      isCurrent
+                        ? 'bg-emerald-50/70 border-emerald-300 ring-1 ring-emerald-400/30'
+                        : 'bg-white border-slate-200/80'
+                    }`}
+                  >
+                    {/* User Info & Avatar Preview */}
+                    <div className="flex items-center gap-3">
+                      {/* Avatar Circle */}
+                      <div className="relative w-11 h-11 rounded-full ring-2 ring-slate-200 overflow-hidden bg-slate-100 shrink-0 flex items-center justify-center">
+                        {userPhoto ? (
+                          <img
+                            src={userPhoto}
+                            alt={user.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-tr from-slate-600 to-slate-800 text-white font-black text-sm flex items-center justify-center uppercase">
+                            {user.name.charAt(0)}
+                          </div>
+                        )}
+                        {isCurrent && (
+                          <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
+                        )}
+                      </div>
+
+                      {/* Name & Role Tag */}
+                      <div>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-xs font-bold text-slate-900 leading-tight">
+                            {user.name}
+                          </span>
+                          {isCurrent ? (
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-black uppercase tracking-wider flex items-center gap-1">
+                              <CheckCircle2 className="w-2.5 h-2.5" />
+                              Akun Anda
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[9px] font-bold flex items-center gap-1">
+                              <Lock className="w-2.5 h-2.5 text-slate-400" />
+                              Terkunci
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-slate-500 mt-0.5 font-medium">
+                          {user.roleLabel}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons: Only active for logged-in user! */}
+                    <div className="flex items-center gap-2 self-end sm:self-center">
+                      {isCurrent ? (
+                        <>
+                          {/* Hidden File Input */}
+                          <input
+                            type="file"
+                            id={`upload-photo-${idx}`}
+                            accept="image/png, image/jpeg, image/webp"
+                            onChange={(e) => handlePhotoUpload(user.name, e)}
+                            className="hidden"
+                          />
+
+                          <label
+                            htmlFor={`upload-photo-${idx}`}
+                            className={`px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer transition-all ${
+                              isUploading ? 'opacity-50 cursor-wait' : ''
+                            }`}
+                          >
+                            <Camera className="w-3.5 h-3.5" />
+                            <span>{isUploading ? 'Menyimpan...' : userPhoto ? 'Ganti Foto' : 'Unggah Foto'}</span>
+                          </label>
+
+                          {userPhoto && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemovePhoto(user.name)}
+                              className="p-1.5 rounded-xl text-rose-600 hover:bg-rose-100 border border-rose-200 text-xs font-semibold transition-colors cursor-pointer"
+                              title="Hapus Foto Profil"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <div 
+                          className="px-2.5 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-[11px] font-semibold flex items-center gap-1.5 cursor-not-allowed select-none"
+                          title="Foto profil pengguna ini terkunci. Hanya pemilik akun yang dapat menggantinya saat login."
+                        >
+                          <Lock className="w-3 h-3 text-slate-400" />
+                          <span>Terkunci</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

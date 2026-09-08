@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { VoucherItem, SystemSettings, VoucherBatch } from '../types';
-import { Printer, X, Wifi } from 'lucide-react';
+import { Printer, X, Wifi, Loader2 } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 
@@ -26,19 +26,49 @@ export const PrintVouchersModal: React.FC<PrintVouchersModalProps> = ({
     ? vouchers.filter(v => v.batchId === batch.id)
     : vouchers.filter(v => v.status === 'DI_IT' || v.status === 'DI_KOPERASI');
 
+  const [isPrinting, setIsPrinting] = useState(false);
+
   const handlePrint = async () => {
     const element = document.getElementById('print-voucher-area');
     if (!element) return;
     
+    setIsPrinting(true);
     try {
-      const dataUrl = await toPng(element, { quality: 0.98, backgroundColor: '#ffffff' });
+      const dataUrl = await toPng(element, {
+        quality: 1.0,
+        pixelRatio: 3,
+        backgroundColor: '#ffffff',
+        cacheBust: true,
+      });
+
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (element.offsetHeight * pdfWidth) / element.offsetWidth;
-      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 6;
+      const availWidth = pageWidth - (margin * 2);
+      const availHeight = pageHeight - (margin * 2);
+
+      const elemWidth = element.scrollWidth || element.offsetWidth;
+      const elemHeight = element.scrollHeight || element.offsetHeight;
+      const contentRatio = elemHeight / elemWidth;
+
+      let renderWidth = availWidth;
+      let renderHeight = renderWidth * contentRatio;
+
+      if (renderHeight > availHeight) {
+        renderHeight = availHeight;
+        renderWidth = renderHeight / contentRatio;
+      }
+
+      const posX = margin + (availWidth - renderWidth) / 2;
+      const posY = margin + (availHeight - renderHeight) / 2;
+
+      pdf.addImage(dataUrl, 'PNG', posX, posY, renderWidth, renderHeight, undefined, 'FAST');
       pdf.save(`Cetak_Voucher_${batch ? batch.batchNumber : 'Semua'}.pdf`);
     } catch (err) {
       console.error('Error generating PDF:', err);
+    } finally {
+      setIsPrinting(false);
     }
   };
 
@@ -65,10 +95,20 @@ export const PrintVouchersModal: React.FC<PrintVouchersModalProps> = ({
           <div className="flex items-center gap-3">
             <button
               onClick={handlePrint}
-              className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 active:bg-cyan-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+              disabled={isPrinting}
+              className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 active:bg-cyan-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer disabled:opacity-75"
             >
-              <Printer className="w-4 h-4" />
-              <span>Cetak Sekarang</span>
+              {isPrinting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Memproses...</span>
+                </>
+              ) : (
+                <>
+                  <Printer className="w-4 h-4" />
+                  <span>Cetak Sekarang</span>
+                </>
+              )}
             </button>
             <button
               onClick={onClose}

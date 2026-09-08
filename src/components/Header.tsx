@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, Power } from 'lucide-react';
+import { ChevronRight, Power, User } from 'lucide-react';
 import { UserRole, SystemSettings } from '../types';
 
 interface HeaderProps {
@@ -35,6 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const roleInfo = getRoleLabel(currentRole);
+  const currentUserPhoto = loggedInUser && settings.userPhotos ? settings.userPhotos[loggedInUser] : undefined;
 
   const handleLogoutClick = () => {
     if (onLogout) {
@@ -79,24 +80,49 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Right Side: User Badge & Power Button */}
+        {/* Right Side: User Photo Avatar & Round Power Button */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* User Badge */}
-          {loggedInUser && (
-            <div className="hidden md:flex items-center gap-2 pl-2 pr-3 py-1 bg-slate-50 rounded-full border border-slate-200">
-              <div className="w-6 h-6 rounded-full bg-sky-600 text-white font-bold text-[10px] flex items-center justify-center">
-                {loggedInUser.charAt(0).toUpperCase()}
-              </div>
-              <span className="text-xs font-bold text-slate-700 max-w-[120px] truncate">
-                {loggedInUser}
-              </span>
+          {/* User Photo Avatar Button (Sebelah Kiri Icon Keluar Aplikasi) */}
+          <button
+            type="button"
+            onClick={onOpenSettings}
+            className="group flex items-center gap-2 p-1 sm:pl-1.5 sm:pr-3 sm:py-1 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-emerald-300 transition-all cursor-pointer shadow-2xs"
+            title={loggedInUser ? `Foto Profil & Pengaturan Akun: ${loggedInUser}` : 'Pengaturan Akun'}
+          >
+            {/* Round Avatar Container */}
+            <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full ring-2 ring-emerald-500/40 overflow-hidden bg-slate-200 shrink-0 flex items-center justify-center">
+              {currentUserPhoto ? (
+                <img
+                  src={currentUserPhoto}
+                  alt={loggedInUser || 'User Photo'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-tr from-emerald-600 to-teal-600 text-white font-black text-xs flex items-center justify-center">
+                  {loggedInUser ? loggedInUser.charAt(0).toUpperCase() : <User className="w-4 h-4 text-white" />}
+                </div>
+              )}
+              {/* Online Green Indicator Dot */}
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full" />
             </div>
-          )}
 
-          {/* Round Power Button */}
+            {/* Username Label on larger screens */}
+            {loggedInUser && (
+              <div className="hidden md:flex flex-col text-left">
+                <span className="text-xs font-bold text-slate-800 group-hover:text-emerald-700 transition-colors max-w-[130px] truncate leading-tight">
+                  {loggedInUser}
+                </span>
+                <span className="text-[10px] font-semibold text-slate-400 leading-none">
+                  {roleInfo.tag}
+                </span>
+              </div>
+            )}
+          </button>
+
+          {/* Round Power / Logout Button (Di sebelah kanan foto user) */}
           <button
             onClick={handleLogoutClick}
-            className="p-2 rounded-full text-rose-600 bg-rose-50 hover:bg-rose-100 hover:text-rose-700 active:bg-rose-200 border border-rose-100 shadow-xs transition-colors cursor-pointer flex items-center justify-center"
+            className="p-2.5 rounded-full text-rose-600 bg-rose-50 hover:bg-rose-100 hover:text-rose-700 active:bg-rose-200 border border-rose-100 shadow-xs transition-colors cursor-pointer flex items-center justify-center shrink-0"
             title="Keluar ke Dasbor Login REKAPIN AJA"
           >
             <Power className="w-4 h-4" />

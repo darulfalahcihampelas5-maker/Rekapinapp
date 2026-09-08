@@ -45,6 +45,7 @@ import { SelectSignatoryModal } from './components/SelectSignatoryModal';
 import { SettingsModal } from './components/SettingsModal';
 import { ResetConfirmationModal } from './components/ResetConfirmationModal';
 import { SplashScreen } from './components/SplashScreen';
+import { playWelcomeVoice, playLogoutVoice } from './utils/audioSpeech';
 import { LoginDashboard } from './components/LoginDashboard';
 import { AnimatePresence } from 'motion/react';
 import { auth } from './firebase/config';
@@ -86,7 +87,46 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   throw new Error(JSON.stringify(errInfo));
 }
 
+const AUTH_STORAGE_KEY = 'rekapin_aja_auth_session';
+
+interface SavedAuthSession {
+  isLoggedIn: boolean;
+  loggedInUser: string;
+  loggedInNip: string;
+  currentRole: UserRole;
+  activeTab: string;
+}
+
+const getInitialAuthSession = (): SavedAuthSession => {
+  try {
+    const saved = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && typeof parsed.isLoggedIn === 'boolean' && parsed.isLoggedIn) {
+        return {
+          isLoggedIn: true,
+          loggedInUser: parsed.loggedInUser || '',
+          loggedInNip: parsed.loggedInNip || '',
+          currentRole: parsed.currentRole || 'IT_ADMIN',
+          activeTab: parsed.activeTab || 'overview',
+        };
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load saved session', e);
+  }
+  return {
+    isLoggedIn: false,
+    loggedInUser: '',
+    loggedInNip: '',
+    currentRole: 'IT_ADMIN',
+    activeTab: 'overview',
+  };
+};
+
 export default function App() {
+  const initialSession = getInitialAuthSession();
+
   // Application Data States populated via Firestore real-time listeners
   const [settings, setSettings] = useState<SystemSettings>(defaultSettings);
   const [batches, setBatches] = useState<VoucherBatch[]>([]);
@@ -96,18 +136,41 @@ export default function App() {
   const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);
   const [isFirebaseConnected, setIsFirebaseConnected] = useState(true);
 
-  // Splash Screen & Login State
+  // Splash Screen & Loading State on Refresh
+  // Always show clean splash screen with animated "Memuat halaman" during initial load/refresh
   const [showSplash, setShowSplash] = useState<boolean>(true);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [loggedInUser, setLoggedInUser] = useState<string>('');
-  const [loggedInNip, setLoggedInNip] = useState<string>('');
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(initialSession.isLoggedIn);
+  const [loggedInUser, setLoggedInUser] = useState<string>(initialSession.loggedInUser);
+  const [loggedInNip, setLoggedInNip] = useState<string>(initialSession.loggedInNip);
 
   // Alur Manajemen Sederhana
-  const [currentRole, setCurrentRole] = useState<UserRole>('IT_ADMIN');
-  const [activeTab, setActiveTab] = useState<string>('overview');
+  const [currentRole, setCurrentRole] = useState<UserRole>(initialSession.currentRole);
+  const [activeTab, setActiveTab] = useState<string>(initialSession.activeTab);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  // Persist session to localStorage on any auth/nav state change
+  useEffect(() => {
+    if (isLoggedIn) {
+      try {
+        localStorage.setItem(
+          AUTH_STORAGE_KEY,
+          JSON.stringify({
+            isLoggedIn: true,
+            loggedInUser,
+            loggedInNip,
+            currentRole,
+            activeTab,
+          })
+        );
+      } catch (e) {
+        console.error('Failed to persist session to localStorage', e);
+      }
+    } else {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+    }
+  }, [isLoggedIn, loggedInUser, loggedInNip, currentRole, activeTab]);
 
   // Login Handlers
   const handleLoginSuccess = (role: UserRole, username: string, nip: string) => {
@@ -116,6 +179,7 @@ export default function App() {
     setCurrentRole(role);
     setActiveTab('overview');
     setIsLoggedIn(true);
+    playWelcomeVoice(username);
   };
 
   const handleBypassAsGuest = () => {
@@ -123,6 +187,7 @@ export default function App() {
     setCurrentRole('KOPERASI');
     setActiveTab('koperasi_settle');
     setIsLoggedIn(true);
+    playWelcomeVoice('Kasir Koperasi');
   };
 
   const requestLogout = () => {
@@ -130,9 +195,12 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    playLogoutVoice();
+    localStorage.removeItem(AUTH_STORAGE_KEY);
     setIsLoggedIn(false);
     setLoggedInUser('');
     setLoggedInNip('');
+    setActiveTab('overview');
     setShowLogoutModal(false);
   };
 
@@ -545,6 +613,8 @@ export default function App() {
         settings={settings}
         onSaveSettings={handleSaveSettings}
         onOpenReset={() => setIsResetModalOpen(true)}
+        loggedInUser={loggedInUser}
+        currentRole={currentRole}
       />
 
       <AnimatePresence>
