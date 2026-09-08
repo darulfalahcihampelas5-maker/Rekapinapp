@@ -13,7 +13,6 @@ import {
   PackageCheck,
   Banknote,
   ChevronRight,
-  Printer,
 } from 'lucide-react';
 
 interface ActivityHistoryProps {
@@ -68,7 +67,7 @@ export const ActivityHistory: React.FC<ActivityHistoryProps> = ({
         icon: ShoppingCart,
         date: d,
         title: `Batch #${b.batchNumber} (${b.voucherQty} Kupon)`,
-        detail: `Pengadaan oleh Tim IT • ${b.providerName || 'PT SIDNet'}`,
+        detail: `Yang melakukan Pembelian : ${b.purchasedBy || 'Tim IT Pengelola'} • Vendor: ${b.providerName || 'PT SIDNet'}`,
         amount: b.totalCost,
         qty: b.voucherQty,
         targetTab: 'it_buy_sidnet',
@@ -191,14 +190,6 @@ export const ActivityHistory: React.FC<ActivityHistoryProps> = ({
             }`}
           >
             {showAllDates ? 'Kembali ke Harian' : 'Semua'}
-          </button>
-
-          <button
-            onClick={() => window.print()}
-            className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 cursor-pointer"
-            title="Cetak"
-          >
-            <Printer className="w-4 h-4" />
           </button>
         </div>
       </div>

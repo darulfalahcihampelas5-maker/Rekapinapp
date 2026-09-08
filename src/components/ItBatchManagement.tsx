@@ -79,6 +79,11 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
   const [vendorName, setVendorName] = useState('PT ForIT Asta Solusindo - SIDNet');
   const [batchNotes, setBatchNotes] = useState('Pengadaan kuota voucher WiFi sekolah');
 
+  const itStaffList = parseStaffNames(settings.itStaffNames);
+  const koperasiStaffList = parseStaffNames(settings.koperasiManagerName);
+
+  const [purchasedBy, setPurchasedBy] = useState<string>(itStaffList[0] || 'Tim IT Pengelola');
+
   // Edit Batch Modal State
   const [editingBatch, setEditingBatch] = useState<VoucherBatch | null>(null);
   const [editPurchaseDate, setEditPurchaseDate] = useState<string>('');
@@ -86,14 +91,12 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
   const [editTotalCost, setEditTotalCost] = useState<number>(0);
   const [editNotes, setEditNotes] = useState<string>('');
   const [editProviderName, setEditProviderName] = useState<string>('');
+  const [editPurchasedBy, setEditPurchasedBy] = useState<string>('');
 
   // Form State: 2. Serah Terima ke Koperasi
   const [selectedBatchId, setSelectedBatchId] = useState<string>(batches[0]?.id || '');
   const [handoverDate, setHandoverDate] = useState<string>(todayStr);
   const [handoverQty, setHandoverQty] = useState<number | ''>('');
-
-  const itStaffList = parseStaffNames(settings.itStaffNames);
-  const koperasiStaffList = parseStaffNames(settings.koperasiManagerName);
 
   const [giverName, setGiverName] = useState(itStaffList[0] || 'Tim IT Pengelola');
   const [receiverName, setReceiverName] = useState(koperasiStaffList[0] || `Pengurus ${settings.koperasiName}`);
@@ -130,8 +133,10 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
 
     if (itList.length > 0) {
       setGiverName(itList[0]);
+      setPurchasedBy(itList[0]);
     } else {
       setGiverName('Tim IT Pengelola');
+      setPurchasedBy('Tim IT Pengelola');
     }
 
     if (koperasiList.length > 0) {
@@ -186,6 +191,7 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
     setEditTotalCost(b.totalCost);
     setEditNotes(b.notes || '');
     setEditProviderName(b.providerName || settings.providerName);
+    setEditPurchasedBy(b.purchasedBy || itStaffList[0] || 'Tim IT Pengelola');
   };
 
   // Save Edit Batch
@@ -201,6 +207,7 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
       unitCost: editVoucherQty > 0 ? Math.round(editTotalCost / editVoucherQty) : editingBatch.unitCost,
       notes: editNotes,
       providerName: editProviderName,
+      purchasedBy: editPurchasedBy || 'Tim IT Pengelola',
     };
 
     onUpdateBatch(updated);
@@ -365,6 +372,7 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
       serialPrefix: `VOU-${String.fromCharCode(65 + (batches.length % 26))}`,
       serialStart: 1001,
       serialEnd: 1000 + qty,
+      purchasedBy: purchasedBy || 'Tim IT Pengelola',
     };
 
     // Tracking items
@@ -602,8 +610,32 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
                 </div>
               </div>
 
-              {/* Vendor & Details */}
+              {/* Petugas IT & Vendor */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center justify-between">
+                    <span>Yang melakukan Pembelian :</span>
+                    <span className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      Tim IT
+                    </span>
+                  </label>
+                  <select
+                    id="input-purchaser-name"
+                    value={purchasedBy}
+                    onChange={(e) => setPurchasedBy(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
+                  >
+                    {itStaffList.map((st, idx) => (
+                      <option key={idx} value={st}>
+                        {st}
+                      </option>
+                    ))}
+                    {!itStaffList.includes(purchasedBy) && purchasedBy && (
+                      <option value={purchasedBy}>{purchasedBy}</option>
+                    )}
+                  </select>
+                </div>
+
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     Nama Mitra Penyedia (Vendor)
@@ -616,7 +648,9 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     Harga Modal / Voucher (Rp)
@@ -631,19 +665,19 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Catatan / Keterangan Pembelian
-                </label>
-                <input
-                  type="text"
-                  value={batchNotes}
-                  onChange={(e) => setBatchNotes(e.target.value)}
-                  placeholder="Keterangan pembelian..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Catatan / Keterangan Pembelian
+                  </label>
+                  <input
+                    type="text"
+                    value={batchNotes}
+                    onChange={(e) => setBatchNotes(e.target.value)}
+                    placeholder="Keterangan pembelian..."
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
               </div>
 
               {/* Action Button */}
@@ -694,6 +728,10 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
                       <div className="flex items-center justify-between text-slate-500 text-[11px]">
                         <span>Tgl: {formatDateIndo(b.purchaseDate)}</span>
                         <span className="font-bold text-slate-800">{formatRupiah(b.totalCost)}</span>
+                      </div>
+                      <div className="text-[11px] text-slate-700 bg-emerald-50/60 rounded px-2 py-1 border border-emerald-100 flex items-center justify-between">
+                        <span className="text-slate-500 font-medium">Yang melakukan Pembelian :</span>
+                        <span className="font-bold text-emerald-800">{b.purchasedBy || 'Tim IT Pengelola'}</span>
                       </div>
                       {b.notes && (
                         <p className="text-[10px] text-slate-400 truncate">{b.notes}</p>
@@ -1037,7 +1075,13 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
 
                       return (
                         <tr key={b.id} className="hover:bg-slate-50/80 transition-colors">
-                          <td className="py-3.5 px-4 font-bold text-slate-900">{b.batchNumber}</td>
+                          <td className="py-3.5 px-4">
+                            <div className="font-bold text-slate-900">{b.batchNumber}</div>
+                            <div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+                              <span className="text-slate-400">Oleh:</span>
+                              <span className="font-semibold text-emerald-700">{b.purchasedBy || 'Tim IT'}</span>
+                            </div>
+                          </td>
                           <td className="py-3.5 px-4 text-slate-600">{formatDateIndo(b.purchaseDate)}</td>
                            <td className="py-3.5 px-4 font-bold text-slate-900">{b.voucherQty} Voucher</td>
                           <td className="py-3.5 px-4">
@@ -1174,17 +1218,37 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
                 </div>
               </div>
 
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  Nama Mitra Penyedia (Vendor)
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={editProviderName}
-                  onChange={(e) => setEditProviderName(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Yang melakukan Pembelian (Tim IT)
+                  </label>
+                  <select
+                    value={editPurchasedBy}
+                    onChange={(e) => setEditPurchasedBy(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    {itStaffList.map((st) => (
+                      <option key={st} value={st}>{st}</option>
+                    ))}
+                    {!itStaffList.includes(editPurchasedBy) && editPurchasedBy && (
+                      <option value={editPurchasedBy}>{editPurchasedBy}</option>
+                    )}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Nama Mitra Penyedia (Vendor)
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editProviderName}
+                    onChange={(e) => setEditProviderName(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
               </div>
 
               <div>

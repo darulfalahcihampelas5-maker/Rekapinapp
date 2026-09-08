@@ -32,6 +32,7 @@ export interface VoucherBatch {
   serialPrefix: string;
   serialStart: number;
   serialEnd: number;
+  purchasedBy?: string; // Tim IT yang melakukan pembelian
 }
 
 export interface VoucherItem {
