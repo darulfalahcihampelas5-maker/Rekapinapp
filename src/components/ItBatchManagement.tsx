@@ -1493,123 +1493,203 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
         </div>
       )}
 
-      {/* Handover Receipt Modal (Modern A4 Formal Handover Document) */}
+      {/* Handover Receipt Modal (2 Reports per A4 Page - Modern & Formal) */}
       {selectedHandoverReceipt && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 print-container">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-slate-200 print:border-none print:shadow-none print:max-w-full print:p-0">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 print-container overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-4 sm:p-5 shadow-2xl space-y-3 border border-slate-200 print:border-none print:shadow-none print:max-w-full print:p-0 my-auto">
             
             {/* Header (Hidden on Print) */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 print:hidden">
+            <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 print:hidden">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <Receipt className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-slate-900 text-sm">Berita Acara & Tanda Terima Penyerahan Voucher</h4>
-                  <p className="text-[11px] text-slate-500">Bukti serah terima voucher fisik dari Tim IT ke Koperasi</p>
+                  <h4 className="font-bold text-slate-900 text-sm">Cetak Tanda Terima Voucher (Format 2 Lembar / A4)</h4>
+                  <p className="text-[11px] text-slate-500">2 salinan tanda terima dalam 1 lembar A4 (Arsip Tim IT & Koperasi)</p>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedHandoverReceipt(null)}
-                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer text-base"
               >
                 &times;
               </button>
             </div>
 
-            {/* Printable Area (1-Page A4 Ready) */}
-            <div id="print-handover-area" className="p-5 rounded-xl bg-slate-50/70 border border-slate-200 text-xs space-y-4 font-sans print:bg-white print:border-none print:p-0">
+            {/* Printable Area (2-in-1 A4 Sheet) */}
+            <div id="print-handover-area" className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200 text-xs font-sans print:border-none print:p-0 space-y-4">
               
-              {/* Kop Surat Header */}
-              <div className="pb-3 border-b-2 border-slate-900 flex justify-between items-start">
-                <div>
-                  <h3 className="text-lg font-black uppercase tracking-tight font-sans">
-                    <span className="text-[#CC2302]">REKAPIN</span> <span className="text-sky-600">AJA</span>
-                  </h3>
-                  <p className="text-[10px] font-bold text-slate-700 uppercase">
-                    UNIT TEKNOLOGI INFORMASI & {settings.koperasiName.toUpperCase()}
-                  </p>
-                  <p className="text-[9px] text-slate-500">
-                    Berita Acara Serah Terima Fisik Kuota Voucher WiFi
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className="inline-block px-2 py-0.5 rounded text-[8px] font-bold bg-cyan-100 text-cyan-800 uppercase tracking-widest border border-cyan-200">
-                    BERITA ACARA RESMI
-                  </span>
-                  <p className="text-[10px] font-mono font-bold text-slate-700 mt-1">
-                    ID: {selectedHandoverReceipt.id}
-                  </p>
-                  <p className="text-[9px] text-slate-500">
-                    Tgl: {formatDateIndo(selectedHandoverReceipt.transferDate)}
-                  </p>
-                </div>
-              </div>
-
-              {/* Transaction Highlight Banner */}
-              <div className="bg-slate-900 text-white rounded-xl p-3.5 flex justify-between items-center shadow-xs">
-                <div>
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-300 block">
-                    Jumlah Voucher Diserahkan
-                  </span>
-                  <span className="text-xl font-black text-emerald-400 tracking-tight">
-                    {selectedHandoverReceipt.qty} Voucher Fisik
-                  </span>
-                </div>
-                <div className="text-right border-l border-slate-700 pl-3">
-                  <span className="text-[9px] text-slate-300 block">Batch Voucher</span>
-                  <span className="text-xs font-bold text-slate-100">{selectedHandoverReceipt.batchNumber}</span>
-                </div>
-              </div>
-
-              {/* Breakdown Table */}
-              <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
-                <table className="w-full text-[11px]">
-                  <tbody>
-                    <tr className="border-b border-slate-100">
-                      <td className="p-2 text-slate-600 bg-slate-50 w-2/5">Nomor Batch Source</td>
-                      <td className="p-2 font-bold text-slate-900">{selectedHandoverReceipt.batchNumber}</td>
-                    </tr>
-                    <tr className="border-b border-slate-100">
-                      <td className="p-2 text-slate-600 bg-slate-50">Volume Kuantitas</td>
-                      <td className="p-2 font-bold text-slate-900">{selectedHandoverReceipt.qty} Lembar Voucher</td>
-                    </tr>
-                    <tr className="border-b border-slate-100">
-                      <td className="p-2 text-slate-600 bg-slate-50">Estimasi Omset Jual (@3.000)</td>
-                      <td className="p-2 font-bold text-emerald-700">{formatRupiah(selectedHandoverReceipt.qty * (settings.sellPricePerUnit || 3000))}</td>
-                    </tr>
-                    <tr>
-                      <td className="p-2 text-slate-600 bg-slate-50">Keterangan / Catatan</td>
-                      <td className="p-2 text-slate-800 italic">{selectedHandoverReceipt.notes || 'Penyerahan voucher fisik untuk dijual di etalase koperasi.'}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Signatures */}
-              <div className="pt-3 border-t border-slate-300 grid grid-cols-2 text-center text-[10px] gap-3">
-                <div className="border border-slate-200 rounded p-2 bg-white">
-                  <span className="text-slate-500 font-bold block uppercase">Yang Menyerahkan (Tim IT)</span>
-                  <div className="h-10 flex items-end justify-center">
-                    <span className="font-bold text-slate-900 underline">{selectedHandoverReceipt.giverName}</span>
+              {/* === LEMBAR 1: ARSIP TIM IT === */}
+              <div className="space-y-2.5 p-3.5 rounded-lg border border-slate-300 bg-white">
+                {/* Kop Header */}
+                <div className="pb-2 border-b-2 border-slate-900 flex justify-between items-start">
+                  <div>
+                    <h3 className="text-base font-black uppercase tracking-tight font-sans">
+                      <span className="text-[#CC2302]">REKAPIN</span> <span className="text-sky-600">AJA</span>
+                    </h3>
+                    <p className="text-[9.5px] font-bold text-slate-800 uppercase">
+                      UNIT TEKNOLOGI INFORMASI & {settings.koperasiName.toUpperCase()}
+                    </p>
+                    <p className="text-[8.5px] text-slate-500">
+                      Berita Acara & Tanda Terima Serah Terima Voucher WiFi
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="inline-block px-2 py-0.5 rounded text-[8px] font-black bg-indigo-100 text-indigo-900 uppercase tracking-wider border border-indigo-200">
+                      LEMBAR 1: ARSIP TIM IT (ASLI)
+                    </span>
+                    <p className="text-[9px] font-mono font-bold text-slate-700 mt-1">
+                      ID: {selectedHandoverReceipt.id.slice(0, 10)}
+                    </p>
+                    <p className="text-[8.5px] text-slate-500">
+                      Tgl: {formatDateIndo(selectedHandoverReceipt.transferDate)}
+                    </p>
                   </div>
                 </div>
-                <div className="border border-slate-200 rounded p-2 bg-white">
-                  <span className="text-slate-500 font-bold block uppercase">Yang Menerima ({settings.koperasiName})</span>
-                  <div className="h-10 flex items-end justify-center">
-                    <span className="font-bold text-slate-900 underline">{selectedHandoverReceipt.receiverName}</span>
+
+                {/* Highlight Info Box */}
+                <div className="bg-slate-900 text-white rounded-lg p-2.5 flex justify-between items-center">
+                  <div>
+                    <span className="text-[8.5px] font-bold uppercase tracking-wider text-slate-300 block">
+                      Jumlah Voucher Diserahkan
+                    </span>
+                    <span className="text-base font-black text-emerald-400 tracking-tight">
+                      {selectedHandoverReceipt.qty} Voucher Fisik
+                    </span>
+                  </div>
+                  <div className="text-right border-l border-slate-700 pl-3">
+                    <span className="text-[8.5px] text-slate-300 block">Batch Voucher</span>
+                    <span className="text-xs font-bold text-slate-100">#{selectedHandoverReceipt.batchNumber}</span>
+                  </div>
+                  <div className="text-right border-l border-slate-700 pl-3">
+                    <span className="text-[8.5px] text-slate-300 block">Estimasi Omset (@3.000)</span>
+                    <span className="text-xs font-bold text-emerald-300">
+                      {formatRupiah(selectedHandoverReceipt.qty * (settings.sellPricePerUnit || 3000))}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Rincian Singkat */}
+                <div className="border border-slate-200 rounded overflow-hidden text-[10px]">
+                  <div className="flex border-b border-slate-100 bg-slate-50">
+                    <div className="w-1/3 p-1.5 font-bold text-slate-600">Nomor Batch:</div>
+                    <div className="w-2/3 p-1.5 font-bold text-slate-900">Batch #{selectedHandoverReceipt.batchNumber} ({selectedHandoverReceipt.qty} Kupon)</div>
+                  </div>
+                  <div className="flex bg-white">
+                    <div className="w-1/3 p-1.5 font-bold text-slate-600">Catatan / Keterangan:</div>
+                    <div className="w-2/3 p-1.5 text-slate-800 italic">{selectedHandoverReceipt.notes || 'Penyerahan voucher fisik untuk dijual di etalase koperasi.'}</div>
+                  </div>
+                </div>
+
+                {/* Signatures (Ruang tanda tangan lebih lapang ke bawah) */}
+                <div className="pt-2 border-t border-slate-200 grid grid-cols-2 text-center text-[9.5px] gap-3">
+                  <div className="border border-slate-200 rounded p-2 bg-slate-50/50">
+                    <span className="text-slate-600 font-bold block uppercase text-[8.5px]">Yang Menyerahkan (Tim IT)</span>
+                    <div className="h-14 flex items-end justify-center pb-0.5">
+                      <span className="font-bold text-slate-900 underline">{selectedHandoverReceipt.giverName}</span>
+                    </div>
+                  </div>
+                  <div className="border border-slate-200 rounded p-2 bg-slate-50/50">
+                    <span className="text-slate-600 font-bold block uppercase text-[8.5px]">Yang Menerima ({settings.koperasiName})</span>
+                    <div className="h-14 flex items-end justify-center pb-0.5">
+                      <span className="font-bold text-slate-900 underline">{selectedHandoverReceipt.receiverName}</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <p className="text-center text-[8px] text-slate-400 italic">
-                Dokumen berita acara ini berlaku sebagai bukti sah perpindahan inventaris fisik voucher WiFi.
-              </p>
+              {/* === GARIS POTONG / GUNTING TENGAH A4 === */}
+              <div className="relative flex items-center justify-center my-1">
+                <div className="border-t-2 border-dashed border-slate-400 w-full"></div>
+                <span className="absolute bg-white px-3 text-[9px] font-mono font-bold text-slate-500 flex items-center gap-1.5">
+                  ✂ -------------------- Potong / Gunting di Sini -------------------- ✂
+                </span>
+              </div>
+
+              {/* === LEMBAR 2: ARSIP KOPERASI === */}
+              <div className="space-y-2.5 p-3.5 rounded-lg border border-slate-300 bg-white">
+                {/* Kop Header */}
+                <div className="pb-2 border-b-2 border-slate-900 flex justify-between items-start">
+                  <div>
+                    <h3 className="text-base font-black uppercase tracking-tight font-sans">
+                      <span className="text-[#CC2302]">REKAPIN</span> <span className="text-sky-600">AJA</span>
+                    </h3>
+                    <p className="text-[9.5px] font-bold text-slate-800 uppercase">
+                      UNIT TEKNOLOGI INFORMASI & {settings.koperasiName.toUpperCase()}
+                    </p>
+                    <p className="text-[8.5px] text-slate-500">
+                      Berita Acara & Tanda Terima Serah Terima Voucher WiFi
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="inline-block px-2 py-0.5 rounded text-[8px] font-black bg-amber-100 text-amber-900 uppercase tracking-wider border border-amber-200">
+                      LEMBAR 2: ARSIP KOPERASI (SALINAN)
+                    </span>
+                    <p className="text-[9px] font-mono font-bold text-slate-700 mt-1">
+                      ID: {selectedHandoverReceipt.id.slice(0, 10)}
+                    </p>
+                    <p className="text-[8.5px] text-slate-500">
+                      Tgl: {formatDateIndo(selectedHandoverReceipt.transferDate)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Highlight Info Box */}
+                <div className="bg-slate-900 text-white rounded-lg p-2.5 flex justify-between items-center">
+                  <div>
+                    <span className="text-[8.5px] font-bold uppercase tracking-wider text-slate-300 block">
+                      Jumlah Voucher Diserahkan
+                    </span>
+                    <span className="text-base font-black text-emerald-400 tracking-tight">
+                      {selectedHandoverReceipt.qty} Voucher Fisik
+                    </span>
+                  </div>
+                  <div className="text-right border-l border-slate-700 pl-3">
+                    <span className="text-[8.5px] text-slate-300 block">Batch Voucher</span>
+                    <span className="text-xs font-bold text-slate-100">#{selectedHandoverReceipt.batchNumber}</span>
+                  </div>
+                  <div className="text-right border-l border-slate-700 pl-3">
+                    <span className="text-[8.5px] text-slate-300 block">Estimasi Omset (@3.000)</span>
+                    <span className="text-xs font-bold text-emerald-300">
+                      {formatRupiah(selectedHandoverReceipt.qty * (settings.sellPricePerUnit || 3000))}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Rincian Singkat */}
+                <div className="border border-slate-200 rounded overflow-hidden text-[10px]">
+                  <div className="flex border-b border-slate-100 bg-slate-50">
+                    <div className="w-1/3 p-1.5 font-bold text-slate-600">Nomor Batch:</div>
+                    <div className="w-2/3 p-1.5 font-bold text-slate-900">Batch #{selectedHandoverReceipt.batchNumber} ({selectedHandoverReceipt.qty} Kupon)</div>
+                  </div>
+                  <div className="flex bg-white">
+                    <div className="w-1/3 p-1.5 font-bold text-slate-600">Catatan / Keterangan:</div>
+                    <div className="w-2/3 p-1.5 text-slate-800 italic">{selectedHandoverReceipt.notes || 'Penyerahan voucher fisik untuk dijual di etalase koperasi.'}</div>
+                  </div>
+                </div>
+
+                {/* Signatures (Ruang tanda tangan lebih lapang ke bawah) */}
+                <div className="pt-2 border-t border-slate-200 grid grid-cols-2 text-center text-[9.5px] gap-3">
+                  <div className="border border-slate-200 rounded p-2 bg-slate-50/50">
+                    <span className="text-slate-600 font-bold block uppercase text-[8.5px]">Yang Menyerahkan (Tim IT)</span>
+                    <div className="h-14 flex items-end justify-center pb-0.5">
+                      <span className="font-bold text-slate-900 underline">{selectedHandoverReceipt.giverName}</span>
+                    </div>
+                  </div>
+                  <div className="border border-slate-200 rounded p-2 bg-slate-50/50">
+                    <span className="text-slate-600 font-bold block uppercase text-[8.5px]">Yang Menerima ({settings.koperasiName})</span>
+                    <div className="h-14 flex items-end justify-center pb-0.5">
+                      <span className="font-bold text-slate-900 underline">{selectedHandoverReceipt.receiverName}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
             </div>
 
             {/* Modal Controls */}
-            <div className="flex items-center gap-2 print:hidden">
+            <div className="flex items-center gap-2 print:hidden pt-1">
               <button
                 onClick={async () => {
                   const element = document.getElementById('print-handover-area');
@@ -1625,7 +1705,7 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
                     const pdf = new jsPDF('p', 'mm', 'a4');
                     const pageWidth = pdf.internal.pageSize.getWidth();
                     const pageHeight = pdf.internal.pageSize.getHeight();
-                    const margin = 10;
+                    const margin = 8;
                     const availWidth = pageWidth - (margin * 2);
                     const availHeight = pageHeight - (margin * 2);
 
@@ -1641,11 +1721,12 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
                       renderWidth = renderHeight / contentRatio;
                     }
 
+                    // Posisi rapi di bagian atas halaman (tidak menggantung di tengah)
                     const posX = margin + (availWidth - renderWidth) / 2;
-                    const posY = margin + (availHeight - renderHeight) / 2;
+                    const posY = margin;
 
                     pdf.addImage(dataUrl, 'PNG', posX, posY, renderWidth, renderHeight, undefined, 'FAST');
-                    pdf.save(`Tanda_Terima_Voucher_${selectedHandoverReceipt.id.slice(0, 6)}.pdf`);
+                    pdf.save(`Tanda_Terima_Voucher_${selectedHandoverReceipt.id.slice(0, 8)}.pdf`);
                   } catch (err) {
                     console.error('Error generating PDF:', err);
                   }
@@ -1653,7 +1734,7 @@ export const ItBatchManagement: React.FC<ItBatchManagementProps> = ({
                 className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
               >
                 <Printer className="w-4 h-4" />
-                <span>Cetak / Simpan PDF</span>
+                <span>Cetak / Simpan PDF (1 Lembar A4 = 2 Laporan)</span>
               </button>
               <button
                 onClick={() => setSelectedHandoverReceipt(null)}

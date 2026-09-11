@@ -526,123 +526,203 @@ export const KoperasiSettlement: React.FC<KoperasiSettlementProps> = ({
         )}
       </div>
 
-      {/* Receipt Modal (Modern A4 Formal Receipt) */}
+      {/* Receipt Modal (2 Reports per A4 Page - Modern & Formal) */}
       {selectedReceipt && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 print-container">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-slate-200 print:border-none print:shadow-none print:max-w-full print:p-0">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 print-container overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-4 sm:p-5 shadow-2xl space-y-3 border border-slate-200 print:border-none print:shadow-none print:max-w-full print:p-0 my-auto">
             
             {/* Header Controls (Hidden on Print) */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 print:hidden">
+            <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 print:hidden">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <Receipt className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-slate-900 text-sm">Kuitansi / Tanda Terima Setoran Kas</h4>
-                  <p className="text-[11px] text-slate-500">Bukti pembayaran resmi dari Koperasi ke Tim IT</p>
+                  <h4 className="font-bold text-slate-900 text-sm">Cetak Kuitansi Setoran (Format 2 Lembar / A4)</h4>
+                  <p className="text-[11px] text-slate-500">2 salinan kuitansi dalam 1 lembar A4 (Arsip Koperasi & Tim IT)</p>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedReceipt(null)}
-                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer text-base"
               >
                 &times;
               </button>
             </div>
 
-            {/* Printable Official Receipt Area (1-Page A4 Ready) */}
-            <div id="print-kuitansi-area" className="p-5 rounded-xl bg-slate-50/70 border border-slate-200 text-xs space-y-4 font-sans print:bg-white print:border-none print:p-0">
+            {/* Printable Area (2-in-1 A4 Sheet) */}
+            <div id="print-kuitansi-area" className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200 text-xs font-sans print:border-none print:p-0 space-y-4">
               
-              {/* Kop Surat Header */}
-              <div className="pb-3 border-b-2 border-slate-900 flex justify-between items-start">
-                <div>
-                  <h3 className="text-lg font-black uppercase tracking-tight font-sans">
-                    <span className="text-[#CC2302]">REKAPIN</span> <span className="text-sky-600">AJA</span>
-                  </h3>
-                  <p className="text-[10px] font-bold text-slate-700 uppercase">
-                    KOPERASI & UNIT PENGELOLAAN IT
-                  </p>
-                  <p className="text-[9px] text-slate-500">
-                    Kuitansi Penyetoran Kas Hasil Penjualan Voucher WiFi
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className="inline-block px-2 py-0.5 rounded text-[8px] font-bold bg-emerald-100 text-emerald-800 uppercase tracking-widest border border-emerald-200">
-                    BUKTI SETORAN SAH
-                  </span>
-                  <p className="text-[10px] font-mono font-bold text-slate-700 mt-1">
-                    ID: {selectedReceipt.id}
-                  </p>
-                  <p className="text-[9px] text-slate-500">
-                    {formatDateIndo(selectedReceipt.date)}
-                  </p>
-                </div>
-              </div>
-
-              {/* Transaction Summary Card */}
-              <div className="bg-emerald-900 text-white rounded-xl p-3.5 flex justify-between items-center shadow-xs">
-                <div>
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-200 block">
-                    Total Kas Disetor Ke Tim IT
-                  </span>
-                  <span className="text-lg font-black text-white tracking-tight">
-                    {formatRupiah(selectedReceipt.amountCollected)}
-                  </span>
-                </div>
-                <div className="text-right border-l border-emerald-700/60 pl-3">
-                  <span className="text-[9px] text-emerald-200 block">Voucher Terjual</span>
-                  <span className="text-xs font-bold text-emerald-100">{selectedReceipt.vouchersCount} Voucher</span>
-                </div>
-              </div>
-
-              {/* Breakdown Details Table */}
-              <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
-                <table className="w-full text-[11px]">
-                  <tbody>
-                    <tr className="border-b border-slate-100">
-                      <td className="p-2 text-slate-600 bg-slate-50 w-2/5">Volume Terjual</td>
-                      <td className="p-2 font-bold text-slate-900">{selectedReceipt.vouchersCount} Voucher Fisik</td>
-                    </tr>
-                    <tr className="border-b border-slate-100">
-                      <td className="p-2 text-slate-600 bg-slate-50">Omset Penjualan Kotor (@3.000)</td>
-                      <td className="p-2 font-bold text-slate-900">{formatRupiah(selectedReceipt.vouchersCount * (settings.sellPricePerUnit || 3000))}</td>
-                    </tr>
-                    <tr className="border-b border-slate-100">
-                      <td className="p-2 text-slate-600 bg-slate-50">Hak Laba Koperasi (@750)</td>
-                      <td className="p-2 font-bold text-emerald-700">{formatRupiah(selectedReceipt.vouchersCount * (settings.koperasiProfitPerUnit || 750))}</td>
-                    </tr>
-                    <tr>
-                      <td className="p-2 text-slate-600 bg-slate-50">Sisa Net Disetor ke IT (Modal + Hak IT)</td>
-                      <td className="p-2 font-extrabold text-emerald-800">{formatRupiah(selectedReceipt.amountCollected)}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Signatures */}
-              <div className="pt-3 border-t border-slate-300 grid grid-cols-2 text-center text-[10px] gap-3">
-                <div className="border border-slate-200 rounded p-2 bg-white">
-                  <span className="text-slate-500 font-bold block uppercase">Penyetor (Koperasi)</span>
-                  <div className="h-10 flex items-end justify-center">
-                    <span className="font-bold text-slate-900 underline">{selectedReceipt.settledBy}</span>
+              {/* === LEMBAR 1: ARSIP KOPERASI === */}
+              <div className="space-y-2.5 p-3.5 rounded-lg border border-slate-300 bg-white">
+                {/* Kop Header */}
+                <div className="pb-2 border-b-2 border-slate-900 flex justify-between items-start">
+                  <div>
+                    <h3 className="text-base font-black uppercase tracking-tight font-sans">
+                      <span className="text-[#CC2302]">REKAPIN</span> <span className="text-sky-600">AJA</span>
+                    </h3>
+                    <p className="text-[9.5px] font-bold text-slate-800 uppercase">
+                      {settings.koperasiName.toUpperCase()} & UNIT PENGELOLAAN IT
+                    </p>
+                    <p className="text-[8.5px] text-slate-500">
+                      Kuitansi Resmi Penyetoran Kas Hasil Penjualan Voucher WiFi
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="inline-block px-2 py-0.5 rounded text-[8px] font-black bg-emerald-100 text-emerald-900 uppercase tracking-wider border border-emerald-200">
+                      LEMBAR 1: ARSIP KOPERASI (ASLI)
+                    </span>
+                    <p className="text-[9px] font-mono font-bold text-slate-700 mt-1">
+                      ID: {selectedReceipt.id.slice(0, 10)}
+                    </p>
+                    <p className="text-[8.5px] text-slate-500">
+                      Tgl: {formatDateIndo(selectedReceipt.date)}
+                    </p>
                   </div>
                 </div>
-                <div className="border border-slate-200 rounded p-2 bg-white">
-                  <span className="text-slate-500 font-bold block uppercase">Penerima (Tim IT)</span>
-                  <div className="h-10 flex items-end justify-center">
-                    <span className="font-bold text-slate-900 underline">{selectedReceipt.receivedBy}</span>
+
+                {/* Highlight Info Box */}
+                <div className="bg-emerald-950 text-white rounded-lg p-2.5 flex justify-between items-center">
+                  <div>
+                    <span className="text-[8.5px] font-bold uppercase tracking-wider text-emerald-300 block">
+                      Total Kas Disetor Ke Tim IT
+                    </span>
+                    <span className="text-base font-black text-emerald-400 tracking-tight">
+                      {formatRupiah(selectedReceipt.amountCollected)}
+                    </span>
+                  </div>
+                  <div className="text-right border-l border-emerald-800 pl-3">
+                    <span className="text-[8.5px] text-emerald-300 block">Voucher Terjual</span>
+                    <span className="text-xs font-bold text-emerald-100">{selectedReceipt.vouchersCount} Voucher</span>
+                  </div>
+                  <div className="text-right border-l border-emerald-800 pl-3">
+                    <span className="text-[8.5px] text-emerald-300 block">Laba Koperasi (@750)</span>
+                    <span className="text-xs font-bold text-emerald-300">
+                      {formatRupiah(selectedReceipt.vouchersCount * (settings.koperasiProfitPerUnit || 750))}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Rincian Singkat */}
+                <div className="border border-slate-200 rounded overflow-hidden text-[10px]">
+                  <div className="flex border-b border-slate-100 bg-slate-50">
+                    <div className="w-1/3 p-1.5 font-bold text-slate-600">Volume Terjual:</div>
+                    <div className="w-2/3 p-1.5 font-bold text-slate-900">{selectedReceipt.vouchersCount} Lembar Voucher Fisik (Omset Kotor: {formatRupiah(selectedReceipt.vouchersCount * (settings.sellPricePerUnit || 3000))})</div>
+                  </div>
+                  <div className="flex bg-white">
+                    <div className="w-1/3 p-1.5 font-bold text-slate-600">Catatan / Keterangan:</div>
+                    <div className="w-2/3 p-1.5 text-slate-800 italic">{selectedReceipt.notes || 'Penyetoran kas penerimaan penjualan voucher ke kas Tim IT.'}</div>
+                  </div>
+                </div>
+
+                {/* Signatures (Ruang tanda tangan lebih lapang ke bawah) */}
+                <div className="pt-2 border-t border-slate-200 grid grid-cols-2 text-center text-[9.5px] gap-3">
+                  <div className="border border-slate-200 rounded p-2 bg-slate-50/50">
+                    <span className="text-slate-600 font-bold block uppercase text-[8.5px]">Penyetor ({settings.koperasiName})</span>
+                    <div className="h-14 flex items-end justify-center pb-0.5">
+                      <span className="font-bold text-slate-900 underline">{selectedReceipt.settledBy}</span>
+                    </div>
+                  </div>
+                  <div className="border border-slate-200 rounded p-2 bg-slate-50/50">
+                    <span className="text-slate-600 font-bold block uppercase text-[8.5px]">Penerima (Tim IT)</span>
+                    <div className="h-14 flex items-end justify-center pb-0.5">
+                      <span className="font-bold text-slate-900 underline">{selectedReceipt.receivedBy}</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <p className="text-center text-[8px] text-slate-400 italic">
-                Simpan bukti tanda terima ini sebagai dokumen verifikasi resmi audit keuangan sekolah.
-              </p>
+              {/* === GARIS POTONG / GUNTING TENGAH A4 === */}
+              <div className="relative flex items-center justify-center my-1">
+                <div className="border-t-2 border-dashed border-slate-400 w-full"></div>
+                <span className="absolute bg-white px-3 text-[9px] font-mono font-bold text-slate-500 flex items-center gap-1.5">
+                  ✂ -------------------- Potong / Gunting di Sini -------------------- ✂
+                </span>
+              </div>
+
+              {/* === LEMBAR 2: ARSIP TIM IT === */}
+              <div className="space-y-2.5 p-3.5 rounded-lg border border-slate-300 bg-white">
+                {/* Kop Header */}
+                <div className="pb-2 border-b-2 border-slate-900 flex justify-between items-start">
+                  <div>
+                    <h3 className="text-base font-black uppercase tracking-tight font-sans">
+                      <span className="text-[#CC2302]">REKAPIN</span> <span className="text-sky-600">AJA</span>
+                    </h3>
+                    <p className="text-[9.5px] font-bold text-slate-800 uppercase">
+                      {settings.koperasiName.toUpperCase()} & UNIT PENGELOLAAN IT
+                    </p>
+                    <p className="text-[8.5px] text-slate-500">
+                      Kuitansi Resmi Penyetoran Kas Hasil Penjualan Voucher WiFi
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="inline-block px-2 py-0.5 rounded text-[8px] font-black bg-indigo-100 text-indigo-900 uppercase tracking-wider border border-indigo-200">
+                      LEMBAR 2: ARSIP TIM IT (SALINAN)
+                    </span>
+                    <p className="text-[9px] font-mono font-bold text-slate-700 mt-1">
+                      ID: {selectedReceipt.id.slice(0, 10)}
+                    </p>
+                    <p className="text-[8.5px] text-slate-500">
+                      Tgl: {formatDateIndo(selectedReceipt.date)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Highlight Info Box */}
+                <div className="bg-emerald-950 text-white rounded-lg p-2.5 flex justify-between items-center">
+                  <div>
+                    <span className="text-[8.5px] font-bold uppercase tracking-wider text-emerald-300 block">
+                      Total Kas Disetor Ke Tim IT
+                    </span>
+                    <span className="text-base font-black text-emerald-400 tracking-tight">
+                      {formatRupiah(selectedReceipt.amountCollected)}
+                    </span>
+                  </div>
+                  <div className="text-right border-l border-emerald-800 pl-3">
+                    <span className="text-[8.5px] text-emerald-300 block">Voucher Terjual</span>
+                    <span className="text-xs font-bold text-emerald-100">{selectedReceipt.vouchersCount} Voucher</span>
+                  </div>
+                  <div className="text-right border-l border-emerald-800 pl-3">
+                    <span className="text-[8.5px] text-emerald-300 block">Laba Koperasi (@750)</span>
+                    <span className="text-xs font-bold text-emerald-300">
+                      {formatRupiah(selectedReceipt.vouchersCount * (settings.koperasiProfitPerUnit || 750))}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Rincian Singkat */}
+                <div className="border border-slate-200 rounded overflow-hidden text-[10px]">
+                  <div className="flex border-b border-slate-100 bg-slate-50">
+                    <div className="w-1/3 p-1.5 font-bold text-slate-600">Volume Terjual:</div>
+                    <div className="w-2/3 p-1.5 font-bold text-slate-900">{selectedReceipt.vouchersCount} Lembar Voucher Fisik (Omset Kotor: {formatRupiah(selectedReceipt.vouchersCount * (settings.sellPricePerUnit || 3000))})</div>
+                  </div>
+                  <div className="flex bg-white">
+                    <div className="w-1/3 p-1.5 font-bold text-slate-600">Catatan / Keterangan:</div>
+                    <div className="w-2/3 p-1.5 text-slate-800 italic">{selectedReceipt.notes || 'Penyetoran kas penerimaan penjualan voucher ke kas Tim IT.'}</div>
+                  </div>
+                </div>
+
+                {/* Signatures (Ruang tanda tangan lebih lapang ke bawah) */}
+                <div className="pt-2 border-t border-slate-200 grid grid-cols-2 text-center text-[9.5px] gap-3">
+                  <div className="border border-slate-200 rounded p-2 bg-slate-50/50">
+                    <span className="text-slate-600 font-bold block uppercase text-[8.5px]">Penyetor ({settings.koperasiName})</span>
+                    <div className="h-14 flex items-end justify-center pb-0.5">
+                      <span className="font-bold text-slate-900 underline">{selectedReceipt.settledBy}</span>
+                    </div>
+                  </div>
+                  <div className="border border-slate-200 rounded p-2 bg-slate-50/50">
+                    <span className="text-slate-600 font-bold block uppercase text-[8.5px]">Penerima (Tim IT)</span>
+                    <div className="h-14 flex items-end justify-center pb-0.5">
+                      <span className="font-bold text-slate-900 underline">{selectedReceipt.receivedBy}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-2 print:hidden">
+            <div className="flex items-center gap-2 print:hidden pt-1">
               <button
                 onClick={async () => {
                   const element = document.getElementById('print-kuitansi-area');
@@ -658,7 +738,7 @@ export const KoperasiSettlement: React.FC<KoperasiSettlementProps> = ({
                     const pdf = new jsPDF('p', 'mm', 'a4');
                     const pageWidth = pdf.internal.pageSize.getWidth();
                     const pageHeight = pdf.internal.pageSize.getHeight();
-                    const margin = 10;
+                    const margin = 8;
                     const availWidth = pageWidth - (margin * 2);
                     const availHeight = pageHeight - (margin * 2);
 
@@ -674,11 +754,12 @@ export const KoperasiSettlement: React.FC<KoperasiSettlementProps> = ({
                       renderWidth = renderHeight / contentRatio;
                     }
 
+                    // Posisi rapi di bagian atas halaman (tidak menggantung di tengah)
                     const posX = margin + (availWidth - renderWidth) / 2;
-                    const posY = margin + (availHeight - renderHeight) / 2;
+                    const posY = margin;
 
                     pdf.addImage(dataUrl, 'PNG', posX, posY, renderWidth, renderHeight, undefined, 'FAST');
-                    pdf.save(`Kuitansi_Setoran_${selectedReceipt.id.slice(0, 6)}.pdf`);
+                    pdf.save(`Kuitansi_Setoran_${selectedReceipt.id.slice(0, 8)}.pdf`);
                   } catch (err) {
                     console.error('Error generating PDF:', err);
                   }
@@ -686,7 +767,7 @@ export const KoperasiSettlement: React.FC<KoperasiSettlementProps> = ({
                 className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
               >
                 <Printer className="w-4 h-4" />
-                <span>Cetak / Simpan PDF</span>
+                <span>Cetak / Simpan PDF (1 Lembar A4 = 2 Laporan)</span>
               </button>
               <button
                 onClick={() => setSelectedReceipt(null)}
